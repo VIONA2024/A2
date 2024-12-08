@@ -1,60 +1,22 @@
-// AssignmentTwo 类 - 主程序类，包含 main 方法和其他方法框架
-public class AssignmentTwo {
-    // main 方法 - Java 程序的入口点
-    public static void main(String[] args) {
-        // 这里可以创建各个类的实例并进行相关测试等操作
-    }
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
 
-    // partThree 方法框架 - 根据任务要求预留的方法框架
-    public void partThree() {
-        //实现任务要求的第三部分功能
-    }
+// 抽象的Person类 - 永远不能被实例化（即不能从该类创建对象）
+abstract class Person {
+    private String name;
+    private int age;
+    private String gender;
 
-    // partFourA 方法框架 - 根据任务要求预留的方法框架
-    public void partFourA() {
-        //实现任务要求的第四部分A功能
-    }
-
-    // partFourB 方法框架 - 根据任务要求预留的方法框架
-    public void partFourB() {
-        //实现任务要求的第四部分B功能
-    }
-
-    // partFive 方法框架 - 根据任务要求预留的方法框架
-    public void partFive() {
-        //实现任务要求的第五部分功能
-    }
-
-    // partSix 方法框架 - 根据任务要求预留的方法框架
-    public void partSix() {
-        //实现任务要求的第六部分功能
-    }
-
-    // partSeven 方法框架 - 根据任务要求预留的方法框架
-    public void partSeven() {
-        //实现任务要求的第七部分功能
-    }
-}
-
-// Person 类 - 表示一般的人物信息
-class Person {
-    // 实例变量 - 适用于人的属性
-    private String name;  // 姓名
-    private int age;     // 年龄
-    private String gender;  // 性别
-
-    // 默认构造方法 - 无参构造方法
     public Person() {
     }
 
-    // 带参数的构造方法 - 用于初始化人物信息
     public Person(String name, int age, String gender) {
         this.name = name;
         this.age = age;
         this.gender = gender;
     }
 
-    // getter 和 setter 方法 - 用于访问和修改实例变量
     public String getName() {
         return name;
     }
@@ -80,25 +42,21 @@ class Person {
     }
 }
 
-// Employee 类 - 表示主题公园的员工信息，继承自 Person 类
+// Employee类 - 表示主题公园员工信息，继承自Person类
 class Employee extends Person {
-    // 实例变量 - 适用于主题公园员工的属性
-    private String jobTitle;  // 职位
-    private int employeeId;   // 员工编号
+    private String jobTitle;
+    private int employeeId;
 
-    // 默认构造方法 - 调用父类的默认构造方法
     public Employee() {
         super();
     }
 
-    // 带参数的构造方法 - 用于初始化员工信息
     public Employee(String name, int age, String gender, String jobTitle, int employeeId) {
         super(name, age, gender);
         this.jobTitle = jobTitle;
         this.employeeId = employeeId;
     }
 
-    // getter 和 setter 方法 - 用于访问和修改实例变量
     public String getJobTitle() {
         return jobTitle;
     }
@@ -116,31 +74,26 @@ class Employee extends Person {
     }
 }
 
-// Visitor 类 - 表示主题公园的游客信息，继承自 Person 类
+// Visitor类 - 表示主题公园游客信息，继承自Person类
 class Visitor extends Person {
-    // 实例变量 - 适用于主题公园游客的属性
-    private String ticketType;  // 门票类型
-    private boolean isFirstVisit;  // 是否首次游玩
+    private String ticketType;
+    private boolean isFirstVisit;
 
-    // 默认构造方法 - 调用父类的默认构造方法
     public Visitor() {
         super();
     }
 
-    // 带参数的构造方法 - 用于初始化游客信息
     public Visitor(String name, int age, String gender, String ticketType, boolean isFirstVisit) {
         super(name, age, gender);
         this.ticketType = ticketType;
         this.isFirstVisit = isFirstVisit;
     }
 
-    // getter 和 setter 方法 - 用于访问和修改实例变量
     public String getTicketType() {
         return ticketType;
     }
 
     public void setTicketType(String ticketType) {
-        this.ticketType = ticketType;
     }
 
     public boolean isFirstVisit() {
@@ -152,25 +105,71 @@ class Visitor extends Person {
     }
 }
 
-// Ride 类 - 表示主题公园的游乐设施信息
-class Ride {
-    // 实例变量 - 适用于游乐设施的属性
-    private String rideName;  // 游乐设施名称
-    private int rideCapacity;  // 载客量
-    private Employee operator;  // 操作员，用于知道游乐设施是否有操作员负责
+// RideInterface接口 - 定义游乐设施操作相关的方法
+// 根据要求，在这个阶段只涉及游客排队相关操作的接口方法，所以RideInterface接口中暂时只保留了addVisitorToQueue、
+// removeVisitorFromQueue、printQueue这三个与队列操作直接相关的方法定义，用于后续Ride类实现，以管理游客排队情况。
+interface RideInterface {
+    // A method named AddVisitorToQueue to add a Visitor to the Queue (see the interface you created in Part 2).
+    void addVisitorToQueue(Visitor visitor);
+    // A method named RemoveVisitorFromQueue to remove a Visitor from the Queue (see the interface you created in Part 2).
+    void removeVisitorFromQueue(Visitor visitor);
+    // A method named PrintQueue that prints all the details for all Visitors in the Queue in the order they were added (see the interface you created in Part 2).
+    void printQueue();
+}
 
-    // 默认构造方法 - 无参构造方法
+// Ride类 - 表示主题公园游乐设施信息，实现了RideInterface接口
+class Ride implements RideInterface {
+    private String rideName;
+    private int rideCapacity;
+    private Employee operator;
+    private Queue<Visitor> queue;
+
     public Ride() {
+        // 在无参构造方法中初始化游客队列，确保创建Ride对象时队列能正常使用，用于存储等待乘坐该游乐设施的游客。
+        this.queue = new LinkedList<>();
     }
 
-    // 带参数的构造方法 - 用于初始化游乐设施信息
     public Ride(String rideName, int rideCapacity, Employee operator) {
         this.rideName = rideName;
         this.rideCapacity = rideCapacity;
         this.operator = operator;
+        // 在有参构造方法中同样初始化游客队列，确保创建Ride对象时队列能正常使用，用于存储等待乘坐该游乐设施的游客。
+        this.queue = new LinkedList<>();
     }
 
-    // getter 和 setter 方法 - 用于访问和修改实例变量
+    // 实现接口中的添加游客到队列方法
+    // A method named AddVisitorToQueue to add a Visitor to the Queue (see the interface you created in Part 2).
+    @Override
+    public void addVisitorToQueue(Visitor visitor) {
+        queue.add(visitor);
+        System.out.println(visitor.getName() + "已成功添加到队列中。");
+    }
+
+    // 实现接口中的从队列移除游客方法
+    // A method named RemoveVisitorFromQueue to remove a Visitor from the Queue (see the interface you created in Part 2).
+    @Override
+    public void removeVisitorFromQueue(Visitor visitor) {
+        if (queue.remove(visitor)) {
+            System.out.println(visitor.getName() + "已成功从队列中移除。");
+        } else {
+            System.out.println(visitor.getName() + "未在队列中找到，移除失败。");
+        }
+    }
+
+    // 实现接口中的打印队列方法
+    // A method named PrintQueue that prints all the details for all Visitors in the Queue in the order they were added (see the interface you created in Part 2).
+    @Override
+    public void printQueue() {
+        System.out.println("队列中的游客信息如下：");
+        Iterator<Visitor> iterator = queue.iterator();
+        while (iterator.hasNext()) {
+            Visitor visitor = iterator.next();
+            System.out.println("姓名：" + visitor.getName() + "，年龄：" + visitor.getAge() +
+                    "，性别：" + visitor.getGender() + "，门票类型：" + visitor.getTicketType() +
+                    "，是否首次游玩：" + visitor.isFirstVisit());
+        }
+    }
+
     public String getRideName() {
         return rideName;
     }
@@ -193,5 +192,56 @@ class Ride {
 
     public void setOperator(Employee operator) {
         this.operator = operator;
+    }
+}
+
+// AssignmentTwo类 - 主程序类，包含main方法以及其他方法框架
+// AssignmentTwo类 - 主程序类，包含main方法以及其他方法框架
+public class AssignmentTwo {
+    public static void main(String[] args) {
+        partThree();
+    }
+
+    public void partThree() {
+        // 在partThree方法中进行以下操作演示，符合此部分作业要求中对操作演示的规定。
+
+        // 创建一个Ride对象，用于后续添加游客到其对应的排队队列等操作。
+        Employee operator = new Employee("Operator1", 30, "Male", "Ride Operator", 1001);
+        Ride ride = new Ride("过山车", 20, operator);
+
+        // 创建5个游客对象并添加到队列，模拟游客排队等待乘坐游乐设施的情况。
+        Visitor visitor1 = new Visitor("游客1", 25, "Female", "全天票", true);
+        Visitor visitor2 = new Visitor("游客2", 35, "Male", "半天票", false);
+        Visitor visitor3 = new Visitor("游客3", 18, "Female", "全天票", true);
+        Visitor visitor4 = new Visitor("游客4", 40, "Male", "两日票", false);
+        Visitor visitor5 = new Visitor("游客5", 22, "Female", "全天票", true);
+
+        ride.addVisitorToQueue(visitor1);
+        ride.addVisitorToQueue(visitor2);
+        ride.addVisitorToQueue(visitor3);
+        ride.addVisitorToQueue(visitor4);
+        ride.addVisitorToQueue(visitor5);
+
+        // 从队列中移除一个游客，用于测试从队列中移除游客的功能是否正常。
+        ride.removeVisitorFromQueue(visitor3);
+
+        // 打印队列中的所有游客信息，展示当前排队游客的详细情况，方便查看整体排队状态。
+        ride.printQueue();
+    }
+
+    // 其他partFourA等方法定义
+    public void partFourA() {
+    }
+
+    public void partFourB() {
+    }
+
+    public void partFive() {
+    }
+
+    public void partSix() {
+    }
+
+    public void partSeven() {
     }
 }

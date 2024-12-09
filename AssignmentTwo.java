@@ -106,15 +106,23 @@ class Visitor extends Person {
 }
 
 // RideInterface接口 - 定义游乐设施操作相关的方法
-// 根据要求，在这个阶段只涉及游客排队相关操作的接口方法，所以RideInterface接口中暂时只保留了addVisitorToQueue、
-// removeVisitorFromQueue、printQueue这三个与队列操作直接相关的方法定义，用于后续Ride类实现，以管理游客排队情况。
+// 名为addVisitorToQueue的接口方法：用于将一名游客添加到队列中。它有一个Visitor类型的参数。见第3部分。
 interface RideInterface {
-    // A method named AddVisitorToQueue to add a Visitor to the Queue (see the interface you created in Part 2).
     void addVisitorToQueue(Visitor visitor);
-    // A method named RemoveVisitorFromQueue to remove a Visitor from the Queue (see the interface you created in Part 2).
+    // 名为removeVisitorFromQueue的接口方法：用于从队列中移除一名游客。见第3部分。
     void removeVisitorFromQueue(Visitor visitor);
-    // A method named PrintQueue that prints all the details for all Visitors in the Queue in the order they were added (see the interface you created in Part 2).
+    // 名为printQueue的接口方法：用于打印队列中等待的游客列表。见第3部分。
     void printQueue();
+    // 名为runOneCycle的接口方法：用于运行游乐设施一次循环。见第5部分。
+    void runOneCycle();
+    // 名为addVisitorToHistory的接口方法：用于将一名游客添加到游乐设施的乘坐历史记录中。它有一个Visitor类型的参数。见第4部分。
+    void addVisitorToHistory(Visitor visitor);
+    // 名为checkVisitorFromHistory的接口方法：用于检查该游客是否在游乐设施的乘坐历史记录中。它有一个Visitor类型的参数。见第4部分。
+    boolean checkVisitorFromHistory(Visitor visitor);
+    // 名为numberOfVisitors的接口方法：用于返回乘坐历史记录中的游客数量。见第4部分。
+    int numberOfVisitors();
+    // 名为printRideHistory的接口方法：用于打印乘坐过游乐设施的游客列表。见第4部分。
+    void printRideHistory();
 }
 
 // Ride类 - 表示主题公园游乐设施信息，实现了RideInterface接口
@@ -123,45 +131,95 @@ class Ride implements RideInterface {
     private int rideCapacity;
     private Employee operator;
     private Queue<Visitor> queue;
+    private LinkedList<Visitor> rideHistory;
 
     public Ride() {
-        // 在无参构造方法中初始化游客队列，确保创建Ride对象时队列能正常使用，用于存储等待乘坐该游乐设施的游客。
         this.queue = new LinkedList<>();
+        this.rideHistory = new LinkedList<>();
     }
 
     public Ride(String rideName, int rideCapacity, Employee operator) {
         this.rideName = rideName;
         this.rideCapacity = rideCapacity;
         this.operator = operator;
-        // 在有参构造方法中同样初始化游客队列，确保创建Ride对象时队列能正常使用，用于存储等待乘坐该游乐设施的游客。
         this.queue = new LinkedList<>();
+        this.rideHistory = new LinkedList<>();
     }
 
-    // 实现接口中的添加游客到队列方法
-    // A method named AddVisitorToQueue to add a Visitor to the Queue (see the interface you created in Part 2).
+    // 名为addVisitorToQueue的接口方法：用于将一名游客添加到队列中。它有一个Visitor类型的参数。见第3部分。
     @Override
     public void addVisitorToQueue(Visitor visitor) {
         queue.add(visitor);
         System.out.println(visitor.getName() + "已成功添加到队列中。");
     }
 
-    // 实现接口中的从队列移除游客方法
-    // A method named RemoveVisitorFromQueue to remove a Visitor from the Queue (see the interface you created in Part 2).
+    // 名为removeVisitorFromQueue的接口方法：用于从队列中移除一名游客。见第3部分。
     @Override
     public void removeVisitorFromQueue(Visitor visitor) {
         if (queue.remove(visitor)) {
             System.out.println(visitor.getName() + "已成功从队列中移除。");
         } else {
-            System.out.println(visitor.getName() + "未在队列中找到，移除失败。");
+            System.out.println(visitor.getName() + "未在队列中找到。");
         }
     }
 
-    // 实现接口中的打印队列方法
-    // A method named PrintQueue that prints all the details for all Visitors in the Queue in the order they were added (see the interface you created in Part 2).
+    // 名为printQueue的接口方法：用于打印队列中等待的游客列表。见第3部分。
     @Override
     public void printQueue() {
-        System.out.println("队列中的游客信息如下：");
-        Iterator<Visitor> iterator = queue.iterator();
+        System.out.println("队列中的游客：");
+        for (Visitor visitor : queue) {
+            System.out.println("姓名：" + visitor.getName() + "，年龄：" + visitor.getAge() +
+                    "，性别：" + visitor.getGender() + "，门票类型：" + visitor.getTicketType() +
+                    "，是否首次游玩：" + visitor.isFirstVisit());
+        }
+    }
+
+    // 名为runOneCycle的接口方法：用于运行游乐设施一次循环。见第5部分。
+    @Override
+    public void runOneCycle() {
+        // 在此处你可以实现运行游乐设施一次循环的逻辑
+        // 例如，如果队列中有游客且游乐设施还有空位
+        if (!queue.isEmpty() && rideHistory.size() < rideCapacity) {
+            Visitor visitor = queue.poll();
+            addVisitorToHistory(visitor);
+            System.out.println(visitor.getName() + "已乘坐了游乐设施。");
+        } else {
+            System.out.println("游乐设施已满或者队列中无人。");
+        }
+    }
+
+    // 名为addVisitorToHistory的接口方法：用于将一名游客添加到游乐设施的乘坐历史记录中。它有一个Visitor类型的参数。见第4部分。
+    @Override
+    public void addVisitorToHistory(Visitor visitor) {
+        rideHistory.add(visitor);
+        System.out.println(visitor.getName() + "已添加到乘坐历史记录中。");
+    }
+
+    // 名为checkVisitorFromHistory的接口方法：用于检查该游客是否在游乐设施的乘坐历史记录中。它有一个Visitor类型的参数。见第4部分。
+    @Override
+    public boolean checkVisitorFromHistory(Visitor visitor) {
+        boolean result = rideHistory.contains(visitor);
+        if (result) {
+            System.out.println(visitor.getName() + "在乘坐历史记录中。");
+        } else {
+            System.out.println(visitor.getName() + "不在乘坐历史记录中。");
+        }
+        return result;
+    }
+
+    // 名为numberOfVisitors的接口方法：用于返回乘坐历史记录中的游客数量。见第4部分。
+    @Override
+    public int numberOfVisitors() {
+        int count = rideHistory.size();
+        System.out.println("乘坐历史记录中的游客数量是：" + count);
+        return count;
+    }
+
+    // 名为printRideHistory的接口方法：用于打印乘坐过游乐设施的游客列表。见第4部分。
+    @Override
+    public void printRideHistory() {
+        System.out.println("乘坐历史记录中的游客：");
+        Iterator<Visitor> iterator = rideHistory.iterator();
         while (iterator.hasNext()) {
             Visitor visitor = iterator.next();
             System.out.println("姓名：" + visitor.getName() + "，年龄：" + visitor.getAge() +
@@ -196,40 +254,16 @@ class Ride implements RideInterface {
 }
 
 // AssignmentTwo类 - 主程序类，包含main方法以及其他方法框架
-// AssignmentTwo类 - 主程序类，包含main方法以及其他方法框架
+// AssignmentTwo class - 主程序类，包含 main 方法和其他方法框架
 public class AssignmentTwo {
+    // The main method, which is the entry point of the Java application
     public static void main(String[] args) {
-        partThree();
+        // 这里可以创建各个类的实例并进行相关测试等操作
     }
 
     public void partThree() {
-        // 在partThree方法中进行以下操作演示，符合此部分作业要求中对操作演示的规定。
-
-        // 创建一个Ride对象，用于后续添加游客到其对应的排队队列等操作。
-        Employee operator = new Employee("Operator1", 30, "Male", "Ride Operator", 1001);
-        Ride ride = new Ride("过山车", 20, operator);
-
-        // 创建5个游客对象并添加到队列，模拟游客排队等待乘坐游乐设施的情况。
-        Visitor visitor1 = new Visitor("游客1", 25, "Female", "全天票", true);
-        Visitor visitor2 = new Visitor("游客2", 35, "Male", "半天票", false);
-        Visitor visitor3 = new Visitor("游客3", 18, "Female", "全天票", true);
-        Visitor visitor4 = new Visitor("游客4", 40, "Male", "两日票", false);
-        Visitor visitor5 = new Visitor("游客5", 22, "Female", "全天票", true);
-
-        ride.addVisitorToQueue(visitor1);
-        ride.addVisitorToQueue(visitor2);
-        ride.addVisitorToQueue(visitor3);
-        ride.addVisitorToQueue(visitor4);
-        ride.addVisitorToQueue(visitor5);
-
-        // 从队列中移除一个游客，用于测试从队列中移除游客的功能是否正常。
-        ride.removeVisitorFromQueue(visitor3);
-
-        // 打印队列中的所有游客信息，展示当前排队游客的详细情况，方便查看整体排队状态。
-        ride.printQueue();
     }
 
-    // 其他partFourA等方法定义
     public void partFourA() {
     }
 

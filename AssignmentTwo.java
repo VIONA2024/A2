@@ -1,3 +1,6 @@
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -10,8 +13,7 @@ abstract class Person {
     private int age;
     private String gender;
 
-    public Person() {
-    }
+    public Person() {}
 
     public Person(String name, int age, String gender) {
         this.name = name;
@@ -95,8 +97,7 @@ class Visitor extends Person {
         return ticketType;
     }
 
-    public void setTicketType(String ticketType) {
-    }
+    public void setTicketType(String ticketType) {}
 
     public boolean isFirstVisit() {
         return isFirstVisit;
@@ -127,8 +128,8 @@ class Ride implements RideInterface {
     private Employee operator;
     private Queue<Visitor> queue;
     private LinkedList<Visitor> rideHistory;
-    private int maxRider; // 新增属性，一次周期可搭载的游客数量
-    private int numOfCycles; // 新增属性，游乐设施已运行的周期次数，默认为0
+    private int maxRider;
+    private int numOfCycles;
 
     // 构造方法，接受游乐设施名称、容量和操作员
     public Ride(String rideName, int rideCapacity, Employee operator) {
@@ -137,7 +138,7 @@ class Ride implements RideInterface {
         this.operator = operator;
         this.queue = new LinkedList<>();
         this.rideHistory = new LinkedList<>();
-        this.maxRider = 1; // 默认一次至少搭载1名游客
+        this.maxRider = 1;
         this.numOfCycles = 0;
     }
 
@@ -243,6 +244,23 @@ class Ride implements RideInterface {
         System.out.println("本次游乐设施周期已运行完毕，已运行周期次数：" + numOfCycles);
     }
 
+    // 添加的将乘坐历史记录中的游客信息写入文件的方法
+    public void exportRideHistory() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("ride_history.txt"))) {
+            Iterator<Visitor> iterator = rideHistory.iterator();
+            while (iterator.hasNext()) {
+                Visitor visitor = iterator.next();
+                String line = visitor.getName() + "," + visitor.getAge() + "," + visitor.getGender() + "," +
+                        visitor.getTicketType() + "," + visitor.isFirstVisit();
+                writer.write(line);
+                writer.newLine();
+            }
+            System.out.println("乘坐历史记录已成功导出到文件ride_history.txt。");
+        } catch (IOException e) {
+            System.err.println("导出乘坐历史记录到文件时出现错误: " + e.getMessage());
+        }
+    }
+
     public int getMaxRider() {
         return maxRider;
     }
@@ -284,7 +302,6 @@ class Ride implements RideInterface {
 class VisitorComparator implements Comparator<Visitor> {
     @Override
     public int compare(Visitor v1, Visitor v2) {
-        // 先按照年龄比较，如果年龄相同，再按照是否首次游玩比较
         int ageCompare = Integer.compare(v1.getAge(), v2.getAge());
         if (ageCompare == 0) {
             return Boolean.compare(v1.isFirstVisit(), v2.isFirstVisit());
@@ -297,13 +314,12 @@ class VisitorComparator implements Comparator<Visitor> {
 public class AssignmentTwo {
     public static void main(String[] args) {
         AssignmentTwo assignmentTwo = new AssignmentTwo();
-        
+
         assignmentTwo.partThree();
         assignmentTwo.partFourA();
         assignmentTwo.partFourB();
         assignmentTwo.partFive();
-        Employee operator = new Employee("Operator1", 30, "Male", "Ride Operator", 1001);
-        Ride ride = new Ride("过山车", 20, operator); // 使用新的构造方法
+        assignmentTwo.partSix();
     }
 
     public void partThree() {
@@ -332,25 +348,19 @@ public class AssignmentTwo {
         Ride ride = new Ride("过山车", 20, operator);
 
         Visitor visitor1 = new Visitor("游客1", 25, "Female", "全天票", true);
-        Visitor visitor2 = new Visitor("游客2", 35, "Male", "半天票", false);
+        Visitor visitor2 = new Visitor("游客2", 30, "Male", "半天票", false);
         Visitor visitor3 = new Visitor("游客3", 18, "Female", "全天票", true);
         Visitor visitor4 = new Visitor("游客4", 40, "Male", "两日票", false);
         Visitor visitor5 = new Visitor("游客5", 22, "Female", "全天票", true);
 
-        // 添加游客到乘坐历史
         ride.addVisitorToHistory(visitor1);
         ride.addVisitorToHistory(visitor2);
         ride.addVisitorToHistory(visitor3);
         ride.addVisitorToHistory(visitor4);
         ride.addVisitorToHistory(visitor5);
 
-        // 检查游客是否在乘坐历史中
         ride.checkVisitorFromHistory(visitor3);
-
-        // 打印乘坐历史中的游客数量
         ride.numberOfVisitors();
-
-        // 打印乘坐历史中的游客信息
         ride.printRideHistory();
     }
 
@@ -364,21 +374,17 @@ public class AssignmentTwo {
         Visitor visitor4 = new Visitor("游客4", 40, "Male", "两日票", false);
         Visitor visitor5 = new Visitor("游客5", 22, "Female", "全天票", true);
 
-        // 添加游客到乘坐历史
         ride.addVisitorToHistory(visitor1);
         ride.addVisitorToHistory(visitor2);
         ride.addVisitorToHistory(visitor3);
         ride.addVisitorToHistory(visitor4);
         ride.addVisitorToHistory(visitor5);
 
-        // 打印排序前乘坐历史中的游客信息
         System.out.println("排序前乘坐历史中的游客信息：");
         ride.printRideHistory();
 
-        // 对乘坐历史中的游客进行排序
         ride.sortVisitors();
 
-        // 打印排序后乘坐历史中的游客信息
         System.out.println("排序后乘坐历史中的游客信息：");
         ride.printRideHistory();
     }
@@ -398,32 +404,40 @@ public class AssignmentTwo {
         Visitor visitor9 = new Visitor("游客9", 19, "Female", "全天票", true);
         Visitor visitor10 = new Visitor("游客10", 24, "Male", "全天票", false);
 
-        // 添加游客到队列
         for (Visitor v : new Visitor[]{visitor1, visitor2, visitor3, visitor4, visitor5, visitor6, visitor7, visitor8, visitor9, visitor10}) {
             ride.addVisitorToQueue(v);
         }
 
-        // 打印运行周期前队列中的游客信息
         System.out.println("运行周期前队列中的游客信息：");
         ride.printQueue();
 
-        // 运行一次游乐设施周期
         ride.runOneCycle();
 
-        // 打印运行一次周期后队列中的游客信息
         System.out.println("运行一次周期后队列中的游客信息：");
         ride.printQueue();
 
-        // 打印乘坐历史中的游客信息
         System.out.println("乘坐历史中的游客信息：");
         ride.printRideHistory();
     }
 
     public void partSix() {
-        // 预留方法，可根据后续作业要求添加相应功能逻辑
+        Employee operator = new Employee("Operator1", 30, "Male", "Ride Operator", 1001);
+        Ride ride = new Ride("新游乐设施", 20, operator);
+
+        Visitor visitor1 = new Visitor("游客11", 28, "Female", "全天票", true);
+        Visitor visitor2 = new Visitor("游客12", 32, "Male", "半天票", false);
+        Visitor visitor3 = new Visitor("游客13", 20, "Female", "全天票", true);
+        Visitor visitor4 = new Visitor("游客14", 40, "Male", "两日票", false);
+        Visitor visitor5 = new Visitor("游客15", 22, "Female", "全天票", true);
+
+        ride.addVisitorToHistory(visitor1);
+        ride.addVisitorToHistory(visitor2);
+        ride.addVisitorToHistory(visitor3);
+        ride.addVisitorToHistory(visitor4);
+        ride.addVisitorToHistory(visitor5);
+
+        ride.exportRideHistory();
     }
 
-    public void partSeven() {
-        // 预留方法，可根据后续作业要求添加相应功能逻辑
-    }
+    public void partSeven() {}
 }

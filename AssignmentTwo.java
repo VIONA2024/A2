@@ -1,4 +1,6 @@
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
@@ -296,6 +298,33 @@ class Ride implements RideInterface {
     public void setOperator(Employee operator) {
         this.operator = operator;
     }
+
+        // 添加的从文件中读取游客信息并添加到rideHistory的方法
+    public void importRideHistory() {
+        try (BufferedReader reader = new BufferedReader(new FileReader("ride_history.txt"))) {  // 创建文件读取流，读取之前导出的文件
+            String line;
+            while ((line = reader.readLine())!= null) {  // 逐行读取文件内容
+                String[] parts = line.split(",");  // 按逗号分割每行内容，得到各属性值
+                if (parts.length == 5) {  // 判断分割后的数组长度是否符合预期（包含姓名、年龄、性别、门票类型、是否首次游玩这5个部分）
+                    String name = parts[0];
+                    int age = Integer.parseInt(parts[1]);  // 将字符串类型的年龄转换为整数，需处理NumberFormatException异常
+                    String gender = parts[2];
+                    String ticketType = parts[3];
+                    boolean isFirstVisit = Boolean.parseBoolean(parts[4]);  // 将字符串类型的布尔值转换为布尔类型
+                    Visitor visitor = new Visitor(name, age, gender, ticketType, isFirstVisit);
+                    rideHistory.add(visitor);  // 将解析出的游客信息创建游客对象后添加到rideHistory列表中
+                } else {
+                    System.err.println("文件中某一行数据格式不正确，无法解析该游客信息。");  // 数据格式不正确时打印错误信息
+                }
+            }
+            System.out.println("已从文件中成功导入游客信息到乘坐历史记录。");  // 成功导入后打印提示信息
+        } catch (IOException e) {
+            System.err.println("读取文件导入乘坐历史记录时出现错误: " + e.getMessage());  // 捕获文件读取相关异常并打印错误信息
+        } catch (NumberFormatException e) {
+            System.err.println("解析游客年龄信息时出现错误: " + e.getMessage());  // 捕获数字解析异常并打印错误信息
+            System.err.println("其他未知错误: " + e.getMessage());  // 捕获其他可能出现的异常并打印错误信息
+        }
+    }
 }
 
 // 自定义比较器类，实现Comparator接口，用于定义游客对象的比较规则
@@ -439,5 +468,12 @@ public class AssignmentTwo {
         ride.exportRideHistory();
     }
 
-    public void partSeven() {}
+    public void partSeven() {
+        Employee operator = new Employee("Operator1", 30, "Male", "Ride Operator", 1001);
+        Ride ride = new Ride("测试游乐设施", 20, operator);  // 创建新的游乐设施实例
+        ride.importRideHistory();  // 调用导入历史记录的方法，从文件读取游客信息
+        int visitorCount = ride.numberOfVisitors();  // 获取导入后乘坐历史记录中的游客数量
+        System.out.println("导入后乘坐历史记录中的游客数量为: " + visitorCount);  // 打印游客数量，用于确认导入数量是否正确
+        ride.printRideHistory();  // 打印所有游客信息，用于确认各游客信息是否正确导入
+    }
 }
